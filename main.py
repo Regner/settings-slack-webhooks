@@ -43,13 +43,15 @@ class Webhooks(Resource):
         parser.add_argument('url', type=str, required=True, help='URL for the Slack webhook')
         args = parser.parse_args(strict=True)
 
-        r.table(RDB_TABLE).insert({
+        result = r.table(RDB_TABLE).insert({
           'character': character_id,
           'name': args['name'],
           'url': args['url'],
         }).run(db.conn)
 
-        return {}, 201
+        webhook_id = result['generated_keys'][0]
+
+        return {}, 201, {'Location': api.url_for(Webhook, character_id=character_id, webhook_id=webhook_id)}
 
 
 class Webhook(Resource):
